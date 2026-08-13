@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { formatSerial } from "@/lib/serial";
 import { getFixOnce } from "@/lib/geo";
@@ -26,6 +27,7 @@ type Store = {
 };
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [ranges, setRanges] = useState<Range[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
   const [actor, setActor] = useState("");
@@ -33,6 +35,12 @@ export default function SettingsPage() {
   const [note, setNote] = useState<{ tone: "ok" | "bad"; text: string } | null>(null);
 
   const load = useCallback(async () => {
+    // The dashboard is a separate server-rendered route, and Next keeps a client-side
+    // copy of it for up to 30s after prefetching. Without this, saving a unit cost here
+    // and clicking "Dashboard" shows the OLD figure — which reads as "my change didn't
+    // save" when it did. Invalidate that cache on every reload.
+    router.refresh();
+
     const supabase = createClient();
 
     const [rangeRes, storeRes, userRes] = await Promise.all([
@@ -50,7 +58,7 @@ export default function SettingsPage() {
     setStores((storeRes.data ?? []) as Store[]);
     setActor(userRes.data.user?.email ?? "admin");
     setLoading(false);
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     void load();
