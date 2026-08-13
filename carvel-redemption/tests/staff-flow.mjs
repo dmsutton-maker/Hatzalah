@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 
-const BASE = "http://127.0.0.1:3000";
+const BASE = process.env.BASE_URL ?? "http://127.0.0.1:3000";
 const STORE = { lat: 40.294485, lon: -74.028126 };
 
 const results = [];
@@ -9,9 +9,13 @@ function check(name, pass, detail = "") {
   console.log(`${pass ? "PASS" : "FAIL"}  ${name}${detail ? ` — ${detail}` : ""}`);
 }
 
+// When BASE_URL points at a deployed site, outbound HTTPS goes through the agent
+// proxy; local runs must bypass it.
+const PROXY = process.env.HTTPS_PROXY;
 const browser = await chromium.launch({
   executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
   args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"],
+  ...(PROXY ? { proxy: { server: PROXY, bypass: "127.0.0.1,localhost" } } : {}),
 });
 
 const ctx = await browser.newContext({
@@ -113,11 +117,13 @@ check("airplane mode -> NO CONNECTION, never approved", r.code === "offline", `$
 await ctx.setOffline(false);
 
 // The decisive half: nothing may have been recorded or approved.
-const { execSync } = await import("node:child_process");
-const claimed = execSync(
-  `psql -h /var/tmp -p 5433 -U postgres -d carvel -tAc "select coalesce((select 1 from coupons where serial=20 and redeemed_at is not null),0);"`,
-).toString().trim();
-check("airplane mode recorded nothing", claimed === "0", `serial 20 claimed flag = ${claimed}`);
+if (!process.env.BASE_URL) {
+  const { execSync } = await import("node:child_process");
+  const claimed = execSync(
+    `psql -h /var/tmp -p 5433 -U postgres -d carvel -tAc "select coalesce((select 1 from coupons where serial=20 and redeemed_at is not null),0);"`,
+  ).toString().trim();
+  check("airplane mode recorded nothing", claimed === "0", `serial 20 claimed flag = ${claimed}`);
+}
 
 await browser.close();
 

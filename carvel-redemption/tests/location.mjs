@@ -18,9 +18,13 @@ sql("update coupons set redeemed_at=null, redeemed_by=null;");
 sql("truncate scan_log, override_log;");
 sql("update stores set enforce_geofence=false where token='CARVEL-WLB';");
 
+// When BASE_URL points at a deployed site, outbound HTTPS goes through the agent
+// proxy; local runs must bypass it.
+const PROXY = process.env.HTTPS_PROXY;
 const browser = await chromium.launch({
   executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
   args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"],
+  ...(PROXY ? { proxy: { server: PROXY, bypass: "127.0.0.1,localhost" } } : {}),
 });
 
 async function scan(serial, geo, ctxOpts = {}) {
