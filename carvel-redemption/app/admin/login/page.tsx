@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { toLoginEmail } from "@/lib/username";
 
 export default function LoginPage() {
   return (
@@ -28,10 +29,17 @@ function LoginForm() {
     setStatus(null);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: toLoginEmail(email),
+      password,
+    });
 
     if (error) {
-      setStatus(error.message);
+      setStatus(
+        error.message === "Invalid login credentials"
+          ? "That username or password is not right."
+          : error.message,
+      );
       setBusy(false);
       return;
     }
@@ -41,8 +49,10 @@ function LoginForm() {
   }
 
   async function magicLink() {
-    if (!email) {
-      setStatus("Enter your email address first.");
+    // A username account has no mailbox behind it, so offering to email it a link
+    // would just fail silently. Only a real address can use this.
+    if (!email.includes("@")) {
+      setStatus("Type a full email address to get a sign-in link.");
       return;
     }
     setBusy(true);
@@ -68,12 +78,16 @@ function LoginForm() {
       <form onSubmit={signIn} className="mt-8 space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-semibold text-white/70">
-            Email
+            Username
           </label>
           <input
             id="email"
-            type="email"
-            autoComplete="email"
+            // Not type="email": the whole point is that a bare username validates.
+            type="text"
+            autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -104,14 +118,16 @@ function LoginForm() {
         </button>
       </form>
 
-      <button
-        type="button"
-        onClick={magicLink}
-        disabled={busy}
-        className="mt-3 w-full rounded-lg border border-white/25 px-4 py-3 text-base font-semibold text-white/80 disabled:opacity-40"
-      >
-        Email me a sign-in link instead
-      </button>
+      {email.includes("@") ? (
+        <button
+          type="button"
+          onClick={magicLink}
+          disabled={busy}
+          className="mt-3 w-full rounded-lg border border-white/25 px-4 py-3 text-base font-semibold text-white/80 disabled:opacity-40"
+        >
+          Email me a sign-in link instead
+        </button>
+      ) : null}
 
       {status ? (
         <p role="status" className="mt-4 text-sm text-caution">
