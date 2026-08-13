@@ -1,0 +1,4 @@
+weasyprint>=69.0
+python-barcode>=0.15.1
+qrcode>=7.4
+Pillow>=10.0

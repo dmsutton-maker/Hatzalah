@@ -1,0 +1,13 @@
+# The Next.js app lives in a subdirectory so this repo can hold other Hatzalah
+# projects. Netlify builds from there; the Next runtime plugin handles the rest.
+
+[build]
+  base = "carvel-redemption"
+  command = "npm run build"
+  publish = "carvel-redemption/.next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in the Netlify
+# dashboard (Site settings → Environment variables), not here.
