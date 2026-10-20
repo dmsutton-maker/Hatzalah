@@ -474,16 +474,29 @@ function setup() {
   st.setColumnWidth(2, 320);
 
   // ---- Summary
-  sum.getRange(1, 1, 9, 2).setFormulas([
-    ['Issued', '=COUNTIF(Coupons!B2:B,FALSE)'],
-    ['Redeemed', '=COUNTIFS(Coupons!B2:B,FALSE,Coupons!C2:C,"<>")'],
-    ['Remaining', '=B1-B2'],
-    ['Unit cost', '=Settings!B5'],
-    ['OWED TO CARVEL', '=B2*B4'],
-    ['Redeemed today', '=COUNTIFS(Coupons!B2:B,FALSE,Coupons!C2:C,">="&TODAY(),Coupons!C2:C,"<"&(TODAY()+1))'],
-    ['Manual overrides (total)', '=COUNTA(Overrides!A2:A)'],
-    ['Off-site scans (total)', '=COUNTIFS(Log!F2:F,"far",Log!E2:E,FALSE)'],
-    ['Last scan', '=IFERROR(MAX(Log!A2:A),"")'],
+  // Labels and formulas go in separately: setFormulas() tries to EVALUATE every string,
+  // so a plain label like "Issued" would show #NAME? instead of its text.
+  sum.getRange(1, 1, 9, 1).setValues([
+    ['Issued'],
+    ['Redeemed'],
+    ['Remaining'],
+    ['Unit cost'],
+    ['OWED TO CARVEL'],
+    ['Redeemed today'],
+    ['Manual overrides (total)'],
+    ['Off-site scans (total)'],
+    ['Last scan'],
+  ]);
+  sum.getRange(1, 2, 9, 1).setFormulas([
+    ['=COUNTIF(Coupons!B2:B,FALSE)'],
+    ['=COUNTIFS(Coupons!B2:B,FALSE,Coupons!C2:C,"<>")'],
+    ['=B1-B2'],
+    ['=Settings!B5'],
+    ['=B2*B4'],
+    ['=COUNTIFS(Coupons!B2:B,FALSE,Coupons!C2:C,">="&TODAY(),Coupons!C2:C,"<"&(TODAY()+1))'],
+    ['=COUNTA(Overrides!A2:A)'],
+    ['=COUNTIFS(Log!F2:F,"far",Log!E2:E,FALSE)'],
+    ['=IFERROR(MAX(Log!A2:A),"")'],
   ]);
   sum.getRange(4, 2).setNumberFormat('$0.00');
   sum.getRange(5, 2).setNumberFormat('$0.00');

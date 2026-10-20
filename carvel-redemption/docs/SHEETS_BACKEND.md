@@ -67,3 +67,15 @@ for `Access-Control-Allow-Origin`.
 
 ## The old database
 `supabase/*.sql` is kept for reference only; nothing reads it. It can be paused or deleted.
+
+## Live deployment
+* Sheet: https://docs.google.com/spreadsheets/d/1qGAK_zpTSVUspbi-heRCCSCxqfJJidMW6QAxuIjvKaM/edit
+* Staff screen: https://carvel-redemption.vercel.app/s/CARVEL-WLB
+* The script's web-app URL is `NEXT_PUBLIC_REDEEM_URL` in Vercel. It is public by design
+  (it ships in the page) and is protected the same way the old anon key was: it can only
+  do what `Code.gs` allows — redeem against a valid register token, and report counts.
+
+## Known issue found at launch
+The first version of `setup()` wrote the Summary labels with `setFormulas()`, which tried to
+evaluate words like "Issued" and showed `#NAME?`. Fixed in `gas/Code.gs`; the live Sheet was
+fixed by typing the nine labels into column A. Nothing needs re-pasting.
