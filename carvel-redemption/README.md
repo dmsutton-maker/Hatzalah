@@ -1,3 +1,6 @@
+> **Backend moved from Supabase to a Google Sheet.** The sections below that mention Supabase
+> describe the earlier design; start at `docs/SHEETS_BACKEND.md`.
+
 # Carvel Coupon Redemption — Jersey Shore Hatzalah
 
 Everything needed to build and run the redemption system for the Helmet Safety Reward
@@ -26,7 +29,7 @@ What's missing is the system around them:
 | Path | Status | What it is |
 |---|---|---|
 | `BUILD_BRIEF.md` | **spec** | Full implementation brief. Claude Code's main input. |
-| `supabase/01_schema.sql` | **ready** | Tables and indexes |
+| `supabase/01_schema.sql` | legacy | The previous Postgres backend, kept for reference. Nothing reads it now. |
 | `supabase/02_seed.sql` | **ready** | Seeds serials 1–500, demo serials, store, range |
 | `supabase/03_functions.sql` | **ready** | `redeem()` RPC, `unredeem()`, reporting views |
 | `supabase/04_rls.sql` | **ready** | RLS + grants. Anon gets one function, zero tables. |
@@ -35,7 +38,8 @@ What's missing is the system around them:
 | `supabase/07_geo.sql` | **ready** | Location tagging + geofence. Supersedes the function bodies in 03/05 |
 | `print/` | **working** | Coupon + sign generators. Already produce final PDFs. |
 | `docs/` | reference | Design decisions, the printed-artwork spec, and the override/location rationale |
-| `app/`, `components/`, `lib/` | **built** | The Next.js app |
+| `gas/Code.gs` | **built** | The backend: a Google Apps Script that owns the Google Sheet. See `docs/SHEETS_BACKEND.md` |
+| `app/`, `components/`, `lib/` | **built** | The Next.js staff screen |
 | `tests/` | **built** | Playwright acceptance scripts + a throwaway local backend |
 
 ---

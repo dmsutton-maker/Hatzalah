@@ -1,7 +1,10 @@
 import { chromium } from "playwright";
+import { coupon, reset } from "./harness.mjs";
 
 const BASE = process.env.BASE_URL ?? "http://127.0.0.1:3000";
 const STORE = { lat: 40.294485, lon: -74.028126 };
+
+await reset(); // known state: the migrated data (81 already redeemed)
 
 const results = [];
 function check(name, pass, detail = "") {
@@ -117,13 +120,8 @@ check("airplane mode -> NO CONNECTION, never approved", r.code === "offline", `$
 await ctx.setOffline(false);
 
 // The decisive half: nothing may have been recorded or approved.
-if (!process.env.BASE_URL) {
-  const { execSync } = await import("node:child_process");
-  const claimed = execSync(
-    `psql -h /var/tmp -p 5433 -U postgres -d carvel -tAc "select coalesce((select 1 from coupons where serial=20 and redeemed_at is not null),0);"`,
-  ).toString().trim();
-  check("airplane mode recorded nothing", claimed === "0", `serial 20 claimed flag = ${claimed}`);
-}
+const c20 = await coupon(20);
+check("airplane mode recorded nothing", !c20.redeemed, `serial 20 redeemed = ${c20.redeemed}`);
 
 await browser.close();
 

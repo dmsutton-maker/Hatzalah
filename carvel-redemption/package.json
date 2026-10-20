@@ -11,11 +11,10 @@
     "typecheck": "tsc --noEmit",
     "test:staff": "node tests/staff-flow.mjs",
     "test:location": "node tests/location.mjs",
-    "harness": "./tests/local-harness/start.sh"
+    "harness": "node tests/local-harness/gas-server.mjs",
+    "test:backend": "node tests/sheets-backend.test.mjs"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.45.4",
     "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",
     "next": "^15.0.3",
